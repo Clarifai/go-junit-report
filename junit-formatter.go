@@ -5,7 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"runtime"
+	//"runtime"
 	"strings"
 
 	"github.com/jack0/go-junit-report/parser"
@@ -65,24 +65,24 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 	// convert Report to JUnit test suites
 	for _, pkg := range report.Packages {
 		ts := JUnitTestSuite{
-			Tests:      len(pkg.Tests),
-			Failures:   0,
-			Time:       formatTime(pkg.Time),
-			Name:       pkg.Name,
-			Properties: []JUnitProperty{},
-			TestCases:  []JUnitTestCase{},
+			Tests:    len(pkg.Tests),
+			Failures: 0,
+			Time:     formatTime(pkg.Time),
+			Name:     pkg.Name,
+			//Properties: []JUnitProperty{},
+			TestCases: []JUnitTestCase{},
 		}
 
 		classname := pkg.Name
 		/*if idx := strings.LastIndex(classname, "/"); idx > -1 && idx < len(pkg.Name) {
 			classname = pkg.Name[idx+1:]
-		}*/
+		}
 
 		// properties
 		ts.Properties = append(ts.Properties, JUnitProperty{"go.version", runtime.Version()})
 		if pkg.CoveragePct != "" {
 			ts.Properties = append(ts.Properties, JUnitProperty{"coverage.statements.pct", pkg.CoveragePct})
-		}
+		}*/
 
 		// individual test cases
 		for _, test := range pkg.Tests {
