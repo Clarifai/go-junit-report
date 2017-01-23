@@ -21,12 +21,12 @@ type JUnitTestSuites struct {
 // testcases.
 type JUnitTestSuite struct {
 	XMLName  xml.Name `xml:"testsuite"`
-	Tests    int      `xml:"tests,attr"`
-	Failures int      `xml:"failures,attr"`
-	Errors   int      `xml:"errors,attr"`
-	Skips    int      `xml:"skip,attr"`
-	Time     string   `xml:"time,attr"`
 	Name     string   `xml:"name,attr"`
+	Tests    int      `xml:"tests,attr"`
+	Errors   int      `xml:"errors,attr"`
+	Failures int      `xml:"failures,attr"`
+	Skips    int      `xml:"skip,attr"`
+	Time     string   `xml:"time,omitempty"`
 	//Properties []JUnitProperty `xml:"properties>property,omitempty"`
 	TestCases []JUnitTestCase
 }
@@ -71,8 +71,8 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 			Failures: 0,
 			Errors:   0,
 			Skips:    0,
-			Time:     formatTime(pkg.Time),
-			Name:     pkg.Name,
+			//Time:     formatTime(pkg.Time),
+			Name: pkg.Name,
 			//Properties: []JUnitProperty{},
 			TestCases: []JUnitTestCase{},
 		}
