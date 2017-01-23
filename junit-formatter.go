@@ -23,6 +23,8 @@ type JUnitTestSuite struct {
 	XMLName  xml.Name `xml:"testsuite"`
 	Tests    int      `xml:"tests,attr"`
 	Failures int      `xml:"failures,attr"`
+	Errors   int      `xml:"errors,attr"`
+	Skips    int      `xml:"skip,attr"`
 	Time     string   `xml:"time,attr"`
 	Name     string   `xml:"name,attr"`
 	//Properties []JUnitProperty `xml:"properties>property,omitempty"`
@@ -67,6 +69,8 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 		ts := JUnitTestSuite{
 			Tests:    len(pkg.Tests),
 			Failures: 0,
+			Errors:   0,
+			Skips:    0,
 			Time:     formatTime(pkg.Time),
 			Name:     pkg.Name,
 			//Properties: []JUnitProperty{},
@@ -103,6 +107,7 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 			}
 
 			if test.Result == parser.SKIP {
+				ts.Skips++
 				testCase.SkipMessage = &JUnitSkipMessage{strings.Join(test.Output, "\n")}
 			}
 
@@ -141,5 +146,5 @@ func countFailures(tests []parser.Test) (result int) {
 }
 
 func formatTime(time int) string {
-	return fmt.Sprintf("%.3f", float64(time)/1000.0)
+	return fmt.Sprintf("%.2f", float64(time)/1000.0)
 }

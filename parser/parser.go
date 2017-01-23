@@ -15,7 +15,9 @@ type Result int
 const (
 	PASS Result = iota
 	FAIL
+	PANIC
 	SKIP
+	MISS
 )
 
 // Report is a collection of package tests.
@@ -40,7 +42,7 @@ type Test struct {
 }
 
 var (
-	regexStatus   = regexp.MustCompile(`^\s*--- (PASS|FAIL|SKIP): (.+) \((\d+\.\d+)(?: seconds|s)\)$`)
+	regexStatus   = regexp.MustCompile(`^\s*--- (PASS|FAIL|PANIC|SKIP|MISS): (.+) \((\d+\.\d+)(?: seconds|s)\)$`)
 	regexCoverage = regexp.MustCompile(`^coverage:\s+(\d+\.\d+)%\s+of\s+statements$`)
 	regexResult   = regexp.MustCompile(`^(ok|FAIL)\s+(.+)\s(\d+\.\d+)s(?:\s+coverage:\s+(\d+\.\d+)%\s+of\s+statements)?$`)
 	regexOutput   = regexp.MustCompile(`(    )*\t(.*)`)
@@ -112,7 +114,7 @@ func Parse(r io.Reader, pkgName string) (*Report, error) {
 			// test status
 			if matches[1] == "PASS" {
 				test.Result = PASS
-			} else if matches[1] == "SKIP" {
+			} else if matches[1] == "SKIP" || matches[1] == "MISS" {
 				test.Result = SKIP
 			} else {
 				test.Result = FAIL
