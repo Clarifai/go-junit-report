@@ -20,13 +20,13 @@ type JUnitTestSuites struct {
 // JUnitTestSuite is a single JUnit test suite which may contain many
 // testcases.
 type JUnitTestSuite struct {
-	XMLName    xml.Name        `xml:"testsuite"`
-	Tests      int             `xml:"tests,attr"`
-	Failures   int             `xml:"failures,attr"`
-	Time       string          `xml:"time,attr"`
-	Name       string          `xml:"name,attr"`
-	Properties []JUnitProperty `xml:"properties>property,omitempty"`
-	TestCases  []JUnitTestCase
+	XMLName  xml.Name `xml:"testsuite"`
+	Tests    int      `xml:"tests,attr"`
+	Failures int      `xml:"failures,attr"`
+	Time     string   `xml:"time,attr"`
+	Name     string   `xml:"name,attr"`
+	//Properties []JUnitProperty `xml:"properties>property,omitempty"`
+	TestCases []JUnitTestCase
 }
 
 // JUnitTestCase is a single test case with its result.
