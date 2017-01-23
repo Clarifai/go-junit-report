@@ -74,9 +74,9 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 		}
 
 		classname := pkg.Name
-		if idx := strings.LastIndex(classname, "/"); idx > -1 && idx < len(pkg.Name) {
+		/*if idx := strings.LastIndex(classname, "/"); idx > -1 && idx < len(pkg.Name) {
 			classname = pkg.Name[idx+1:]
-		}
+		}*/
 
 		// properties
 		ts.Properties = append(ts.Properties, JUnitProperty{"go.version", runtime.Version()})
