@@ -5,10 +5,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	//"runtime"
 	"strings"
 
-	"github.com/jack0/go-junit-report/parser"
+	"github.com/clarifai/go-junit-report/parser"
 )
 
 // JUnitTestSuites is a collection of JUnit test suites.

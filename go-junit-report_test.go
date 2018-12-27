@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jack0/go-junit-report/parser"
+	"github.com/clarifai/go-junit-report/parser"
 )
 
 type TestCase struct {
