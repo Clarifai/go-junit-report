@@ -1,14 +1,14 @@
-package main
+package formatter
 
 import (
 	"bufio"
 	"encoding/xml"
 	"fmt"
 	"io"
-	//"runtime"
 	"strings"
+	"time"
 
-	"github.com/jack0/go-junit-report/parser"
+	"github.com/clarifai/go-junit-report/parser"
 )
 
 // JUnitTestSuites is a collection of JUnit test suites.
@@ -61,19 +61,18 @@ type JUnitFailure struct {
 
 // JUnitReportXML writes a JUnit xml representation of the given report to w
 // in the format described at http://windyroad.org/dl/Open%20Source/JUnit.xsd
-func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error {
+func JUnitReportXML(report *parser.Report, noXMLHeader bool, goVersion string, w io.Writer) error {
 	suites := JUnitTestSuites{}
 
 	// convert Report to JUnit test suites
 	for _, pkg := range report.Packages {
+		pkg.Benchmarks = mergeBenchmarks(pkg.Benchmarks)
 		ts := JUnitTestSuite{
-			Tests:    len(pkg.Tests),
+			Tests:    len(pkg.Tests) + len(pkg.Benchmarks),
 			Failures: 0,
-			Errors:   0,
-			Skips:    0,
-			//Time:     formatTime(pkg.Time),
-			Name: pkg.Name,
-			//Properties: []JUnitProperty{},
+			Time:     formatTime(pkg.Duration),
+			Name:     pkg.Name,
+			// Properties: []JUnitProperty{},
 			TestCases: []JUnitTestCase{},
 		}
 
@@ -83,7 +82,11 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 		}
 
 		// properties
-		ts.Properties = append(ts.Properties, JUnitProperty{"go.version", runtime.Version()})
+		if goVersion == "" {
+			// if goVersion was not specified as a flag, fall back to version reported by runtime
+			goVersion = runtime.Version()
+		}
+		ts.Properties = append(ts.Properties, JUnitProperty{"go.version", goVersion})
 		if pkg.CoveragePct != "" {
 			ts.Properties = append(ts.Properties, JUnitProperty{"coverage.statements.pct", pkg.CoveragePct})
 		}*/
@@ -93,7 +96,7 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 			testCase := JUnitTestCase{
 				Classname: classname,
 				Name:      test.Name,
-				Time:      formatTime(test.Time),
+				Time:      formatTime(test.Duration),
 				Failure:   nil,
 			}
 
@@ -112,6 +115,17 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 			}
 
 			ts.TestCases = append(ts.TestCases, testCase)
+		}
+
+		// individual benchmarks
+		for _, benchmark := range pkg.Benchmarks {
+			benchmarkCase := JUnitTestCase{
+				Classname: classname,
+				Name:      benchmark.Name,
+				Time:      formatBenchmarkTime(benchmark.Duration),
+			}
+
+			ts.TestCases = append(ts.TestCases, benchmarkCase)
 		}
 
 		suites.Suites = append(suites.Suites, ts)
@@ -136,15 +150,35 @@ func JUnitReportXML(report *parser.Report, noXMLHeader bool, w io.Writer) error 
 	return nil
 }
 
-func countFailures(tests []parser.Test) (result int) {
-	for _, test := range tests {
-		if test.Result == parser.FAIL {
-			result++
+func mergeBenchmarks(benchmarks []*parser.Benchmark) []*parser.Benchmark {
+	var merged []*parser.Benchmark
+	benchmap := make(map[string][]*parser.Benchmark)
+	for _, bm := range benchmarks {
+		if _, ok := benchmap[bm.Name]; !ok {
+			merged = append(merged, &parser.Benchmark{Name: bm.Name})
 		}
+		benchmap[bm.Name] = append(benchmap[bm.Name], bm)
 	}
-	return
+
+	for _, bm := range merged {
+		for _, b := range benchmap[bm.Name] {
+			bm.Allocs += b.Allocs
+			bm.Bytes += b.Bytes
+			bm.Duration += b.Duration
+		}
+		n := len(benchmap[bm.Name])
+		bm.Allocs /= n
+		bm.Bytes /= n
+		bm.Duration /= time.Duration(n)
+	}
+
+	return merged
 }
 
-func formatTime(time int) string {
-	return fmt.Sprintf("%.2f", float64(time)/1000.0)
+func formatTime(d time.Duration) string {
+	return fmt.Sprintf("%.3f", d.Seconds())
+}
+
+func formatBenchmarkTime(d time.Duration) string {
+	return fmt.Sprintf("%.9f", d.Seconds())
 }
