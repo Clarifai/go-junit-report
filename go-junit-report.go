@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/clarifai/go-junit-report/formatter"
-	"github.com/clarifai/go-junit-report/parser"
+	"github.com/Clarifai/go-junit-report/formatter"
+	"github.com/Clarifai/go-junit-report/parser"
 )
 
 var (
