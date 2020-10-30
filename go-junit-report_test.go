@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/clarifai/go-junit-report/formatter"
-	"github.com/clarifai/go-junit-report/parser"
+	"github.com/Clarifai/go-junit-report/formatter"
+	"github.com/Clarifai/go-junit-report/parser"
 )
 
 var matchTest = flag.String("match", "", "only test testdata matching this pattern")
